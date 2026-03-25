@@ -15,6 +15,34 @@ import { useTaskContext } from "@/context/TaskContext";
 import { KanbanColumn } from "./KanbanColumn";
 import { TaskCard } from "./TaskCard";
 import { TaskDialog } from "./TaskDialog";
+import confetti from "canvas-confetti";
+
+function fireCelebration() {
+  // Burst from center
+  confetti({
+    particleCount: 100,
+    spread: 70,
+    origin: { y: 0.6 },
+    colors: ["#a855f7", "#22d3ee", "#ef4444", "#facc15", "#34d399"],
+  });
+  // Side cannons
+  setTimeout(() => {
+    confetti({
+      particleCount: 50,
+      angle: 60,
+      spread: 55,
+      origin: { x: 0 },
+      colors: ["#a855f7", "#22d3ee", "#ef4444"],
+    });
+    confetti({
+      particleCount: 50,
+      angle: 120,
+      spread: 55,
+      origin: { x: 1 },
+      colors: ["#a855f7", "#22d3ee", "#ef4444"],
+    });
+  }, 200);
+}
 
 export function KanbanBoard() {
   const { getTasksByColumn, moveTask } = useTaskContext();
@@ -56,9 +84,24 @@ export function KanbanBoard() {
     [moveTask]
   );
 
-  const handleDragEnd = useCallback(() => {
-    setActiveTask(null);
-  }, []);
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { over } = event;
+      if (over && activeTask) {
+        const overId = over.id as string;
+        const isColumn = COLUMNS.some((c) => c.id === overId);
+        const targetColumn = isColumn
+          ? (overId as ColumnId)
+          : (over.data.current?.task as Task)?.columnId;
+
+        if (targetColumn === "complete" && activeTask.columnId !== "complete") {
+          fireCelebration();
+        }
+      }
+      setActiveTask(null);
+    },
+    [activeTask]
+  );
 
   const handleAddTask = useCallback((columnId: ColumnId) => {
     setEditingTask(null);

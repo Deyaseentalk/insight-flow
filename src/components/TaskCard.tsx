@@ -8,7 +8,7 @@ import {
   Trash2,
   ChevronRight,
 } from "lucide-react";
-import { Task, PRIORITY_CONFIG } from "@/types/task";
+import { Task, PRIORITY_CONFIG, ColumnId } from "@/types/task";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,12 @@ interface TaskCardProps {
   task: Task;
   onEdit: (task: Task) => void;
 }
+
+const COLUMN_TINT: Record<ColumnId, string> = {
+  "todo": "border-violet/30 bg-violet/5 hover:border-violet/50 hover:shadow-violet/10",
+  "in-progress": "border-peacock/30 bg-peacock/5 hover:border-peacock/50 hover:shadow-peacock/10",
+  "complete": "border-crimson/30 bg-crimson/5 hover:border-crimson/50 hover:shadow-crimson/10",
+};
 
 export function TaskCard({ task, onEdit }: TaskCardProps) {
   const { deleteTask } = useTaskContext();
@@ -51,8 +57,9 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`group relative rounded-xl border border-border bg-card p-4 cursor-pointer
-        transition-all duration-200 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5
+      className={`group relative rounded-xl border p-4 cursor-pointer
+        transition-all duration-200 hover:shadow-lg
+        ${COLUMN_TINT[task.columnId]}
         ${isDragging ? "opacity-50 shadow-2xl scale-105 z-50" : ""}
         animate-fade-in`}
       onClick={() => onEdit(task)}

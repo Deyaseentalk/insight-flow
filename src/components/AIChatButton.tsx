@@ -1,16 +1,19 @@
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, Send, X, Bot } from "lucide-react";
+import { MessageCircle, Send, X, Bot, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTaskContext } from "@/context/TaskContext";
 import { toast } from "sonner";
 import { ColumnId, COLUMNS } from "@/types/task";
+import confetti from "canvas-confetti";
 
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
 }
+
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 
 export function AIChatButton() {
   const [open, setOpen] = useState(false);
@@ -19,7 +22,7 @@ export function AIChatButton() {
       id: "welcome",
       role: "assistant",
       content:
-        "Hey! I'm your LifeBoard AI. I can help you manage tasks. Try:\n\n• **Create task**: \"Add task: Morning jog, 1 hour\"\n• **Move task**: \"Move Learn Spanish to Complete\"\n• **Mark done**: \"Mark Meditate as done\"\n• **Summary**: \"What did I finish today?\"\n• **Suggest**: \"What should I work on next?\"",
+        "Hey! I'm your LifeBoard AI 🚀\n\nI can help manage your goals:\n\n• **Create**: \"Add task: Morning jog, 2 hours\"\n• **Move**: \"Move Learn Spanish to Complete\"\n• **Done**: \"Mark Meditate as done\"\n• **Summary**: \"What did I finish?\"\n• **Suggest**: \"What should I work on next?\"",
     },
   ]);
   const [input, setInput] = useState("");
@@ -31,104 +34,151 @@ export function AIChatButton() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  const processCommand = (text: string): string => {
-    const lower = text.toLowerCase().trim();
+  const parseAndExecuteActions = (text: string) => {
+    const actionMatch = text.match(/<action>([\s\S]*?)<\/action>/);
+    if (!actionMatch) return;
 
-    // Create task
-    const createMatch = lower.match(/(?:add|create) task[:\s]+(.+?)(?:,\s*(\d+)\s*h(?:ours?)?)?$/i);
-    if (createMatch) {
-      const title = createMatch[1].trim();
-      const hours = Number(createMatch[2]) || 1;
-      addTask({
-        title: title.charAt(0).toUpperCase() + title.slice(1),
-        description: "",
-        priority: "medium",
-        dueDate: null,
-        estimatedHours: hours,
-        labels: [],
-        subtasks: [],
-        hasAttachment: false,
-        columnId: "todo",
-      });
-      return `✅ Created task **"${title}"** with ${hours}h estimate in To Do.`;
-    }
+    try {
+      const action = JSON.parse(actionMatch[1]);
 
-    // Move task
-    const moveMatch = lower.match(/move (.+?) to (to\s?do|in\s?progress|complete)/i);
-    if (moveMatch) {
-      const searchTitle = moveMatch[1].trim();
-      const targetMap: Record<string, ColumnId> = {
-        "to do": "todo",
-        "todo": "todo",
-        "in progress": "in-progress",
-        "inprogress": "in-progress",
-        complete: "complete",
-      };
-      const target = targetMap[moveMatch[2].toLowerCase().trim()];
-      const task = tasks.find((t) => t.title.toLowerCase().includes(searchTitle));
-      if (task && target) {
-        moveTask(task.id, target);
-        return `✅ Moved **"${task.title}"** to **${COLUMNS.find((c) => c.id === target)?.title}**.`;
-      }
-      return `❌ Couldn't find a task matching "${searchTitle}".`;
-    }
-
-    // Mark done
-    const doneMatch = lower.match(/mark (.+?) (?:as )?(?:done|complete)/i);
-    if (doneMatch) {
-      const searchTitle = doneMatch[1].trim();
-      const task = tasks.find((t) => t.title.toLowerCase().includes(searchTitle));
-      if (task) {
-        moveTask(task.id, "complete");
-        return `✅ Marked **"${task.title}"** as complete!`;
-      }
-      return `❌ Couldn't find a task matching "${searchTitle}".`;
-    }
-
-    // Summary
-    if (lower.includes("summary") || lower.includes("what did i finish") || lower.includes("today")) {
-      const completed = tasks.filter((t) => t.columnId === "complete");
-      if (completed.length === 0) return "No completed tasks yet. Keep going! 💪";
-      const list = completed.map((t) => `• ${t.title} (${t.estimatedHours}h)`).join("\n");
-      const totalHours = completed.reduce((s, t) => s + t.estimatedHours, 0);
-      return `📊 **Completed tasks (${completed.length}):**\n\n${list}\n\n**Total: ${totalHours}h invested!**`;
-    }
-
-    // Suggest next
-    if (lower.includes("suggest") || lower.includes("what should i") || lower.includes("next")) {
-      const pending = tasks
-        .filter((t) => t.columnId !== "complete")
-        .sort((a, b) => {
-          const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
-          const pDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
-          if (pDiff !== 0) return pDiff;
-          if (a.dueDate && b.dueDate) return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-          if (a.dueDate) return -1;
-          return 1;
+      if (action.action === "create") {
+        addTask({
+          title: action.title || "New Task",
+          description: action.description || "",
+          priority: action.priority || "medium",
+          dueDate: action.dueDate || null,
+          estimatedHours: action.estimatedHours || 1,
+          labels: action.labels || [],
+          subtasks: [],
+          hasAttachment: false,
+          columnId: (action.columnId as ColumnId) || "todo",
         });
-      if (pending.length === 0) return "🎉 All tasks are complete! Time to celebrate!";
-      const top = pending[0];
-      return `🎯 I'd suggest working on **"${top.title}"** next.\n\n• Priority: **${top.priority}**\n• Due: **${top.dueDate || "No deadline"}**\n• Estimated: **${top.estimatedHours}h**\n\nIt's your highest-priority task${top.dueDate ? " with an upcoming deadline" : ""}.`;
-    }
+        toast.success(`Task "${action.title}" created!`);
+      }
 
-    return "I can help with: **create tasks**, **move tasks**, **mark done**, **daily summary**, or **suggest next task**. Try one of those!";
+      if (action.action === "move") {
+        const task = tasks.find((t) =>
+          t.title.toLowerCase().includes(action.searchTitle?.toLowerCase() || "")
+        );
+        if (task && action.targetColumn) {
+          moveTask(task.id, action.targetColumn as ColumnId);
+          toast.success(`Moved "${task.title}" to ${COLUMNS.find((c) => c.id === action.targetColumn)?.title}`);
+          if (action.targetColumn === "complete") {
+            confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } });
+          }
+        }
+      }
+
+      if (action.action === "summary") {
+        // AI handles the text response
+      }
+      if (action.action === "suggest") {
+        // AI handles the text response
+      }
+    } catch {
+      // Not valid JSON action, just display text
+    }
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim() || loading) return;
     const userMsg: Message = { id: crypto.randomUUID(), role: "user", content: input.trim() };
-    setMessages((prev) => [...prev, userMsg]);
+    const updatedMessages = [...messages, userMsg];
+    setMessages(updatedMessages);
     setInput("");
     setLoading(true);
 
-    setTimeout(() => {
-      const response = processCommand(userMsg.content);
+    let assistantContent = "";
+
+    try {
+      // Include task context in the user message
+      const taskContext = `\n\n[Current board state: ${tasks.map((t) => `"${t.title}" (${t.columnId}, ${t.priority}, ${t.estimatedHours}h, due: ${t.dueDate || "none"})`).join("; ")}]`;
+
+      const apiMessages = updatedMessages
+        .filter((m) => m.id !== "welcome")
+        .map((m) => ({
+          role: m.role as "user" | "assistant",
+          content: m.role === "user" && m.id === userMsg.id
+            ? m.content + taskContext
+            : m.content,
+        }));
+
+      const resp = await fetch(CHAT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ messages: apiMessages }),
+      });
+
+      if (!resp.ok) {
+        const errData = await resp.json().catch(() => ({}));
+        throw new Error(errData.error || `Error ${resp.status}`);
+      }
+
+      if (!resp.body) throw new Error("No response stream");
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let textBuffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        textBuffer += decoder.decode(value, { stream: true });
+
+        let newlineIndex: number;
+        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
+
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (line.startsWith(":") || line.trim() === "") continue;
+          if (!line.startsWith("data: ")) continue;
+
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") break;
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+            if (content) {
+              assistantContent += content;
+              setMessages((prev) => {
+                const last = prev[prev.length - 1];
+                const cleanContent = assistantContent.replace(/<action>[\s\S]*?<\/action>/g, "").trim();
+                if (last?.role === "assistant" && last.id !== "welcome") {
+                  return prev.map((m, i) =>
+                    i === prev.length - 1 ? { ...m, content: cleanContent } : m
+                  );
+                }
+                return [...prev, { id: crypto.randomUUID(), role: "assistant", content: cleanContent }];
+              });
+            }
+          } catch {
+            textBuffer = line + "\n" + textBuffer;
+            break;
+          }
+        }
+      }
+
+      // Parse actions after full response
+      parseAndExecuteActions(assistantContent);
+    } catch (e) {
+      console.error("Chat error:", e);
+      toast.error(e instanceof Error ? e.message : "AI chat failed");
       setMessages((prev) => [
         ...prev,
-        { id: crypto.randomUUID(), role: "assistant", content: response },
+        {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: "Sorry, I couldn't process that. Please try again.",
+        },
       ]);
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
   return (
@@ -137,9 +187,9 @@ export function AIChatButton() {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-xl shadow-primary/25 hover:scale-105 transition-transform"
+          className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-xl shadow-primary/25 hover:scale-110 transition-all duration-200 hover:shadow-2xl hover:shadow-primary/40"
         >
-          <MessageCircle className="w-6 h-6" />
+          <Sparkles className="w-6 h-6" />
         </button>
       )}
 
@@ -147,14 +197,14 @@ export function AIChatButton() {
       {open && (
         <div className="fixed bottom-6 right-6 z-50 w-[380px] h-[520px] bg-card border border-border rounded-2xl shadow-2xl flex flex-col animate-slide-in-right overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center">
                 <Bot className="w-4 h-4 text-primary" />
               </div>
               <div>
                 <p className="text-sm font-display font-semibold text-foreground">LifeBoard AI</p>
-                <p className="text-[10px] text-muted-foreground">Professional & concise</p>
+                <p className="text-[10px] text-muted-foreground">Powered by Lovable Cloud</p>
               </div>
             </div>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setOpen(false)}>
@@ -167,7 +217,7 @@ export function AIChatButton() {
             {messages.map((msg) => (
               <div
                 key={msg.id}
-                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in`}
               >
                 <div
                   className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
@@ -187,7 +237,7 @@ export function AIChatButton() {
               </div>
             ))}
             {loading && (
-              <div className="flex justify-start">
+              <div className="flex justify-start animate-fade-in">
                 <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3">
                   <div className="flex gap-1">
                     <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" />
