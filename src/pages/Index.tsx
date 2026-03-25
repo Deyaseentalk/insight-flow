@@ -1,16 +1,51 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState, useEffect, useCallback } from "react";
+import { TaskProvider } from "@/context/TaskContext";
+import { TopBar } from "@/components/TopBar";
+import { DashboardHeader } from "@/components/DashboardHeader";
+import { KanbanBoard } from "@/components/KanbanBoard";
+import { AIChatButton } from "@/components/AIChatButton";
+import { TaskDialog } from "@/components/TaskDialog";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+const Index = () => {
+  const [darkMode, setDarkMode] = useState(true);
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", darkMode);
+  }, [darkMode]);
+
+  // Keyboard shortcut: N to add task
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (
+        e.key === "n" &&
+        !e.metaKey &&
+        !e.ctrlKey &&
+        !(e.target instanceof HTMLInputElement) &&
+        !(e.target instanceof HTMLTextAreaElement)
+      ) {
+        setQuickAddOpen(true);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
-    </div>
+    <TaskProvider>
+      <div className="flex flex-col min-h-screen bg-background transition-colors duration-300">
+        <TopBar darkMode={darkMode} onToggleDark={() => setDarkMode(!darkMode)} />
+        <DashboardHeader />
+        <KanbanBoard />
+        <AIChatButton />
+        <TaskDialog
+          open={quickAddOpen}
+          onOpenChange={setQuickAddOpen}
+          task={null}
+        />
+      </div>
+    </TaskProvider>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
