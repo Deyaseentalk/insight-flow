@@ -22,7 +22,7 @@ export function AIChatButton() {
       id: "welcome",
       role: "assistant",
       content:
-        "Hey! I'm your LifeBoard AI 🚀\n\nI can help manage your goals:\n\n• **Create**: \"Add task: Morning jog, 2 hours\"\n• **Move**: \"Move Learn Spanish to Complete\"\n• **Done**: \"Mark Meditate as done\"\n• **Summary**: \"What did I finish?\"\n• **Suggest**: \"What should I work on next?\"",
+        "Hey! I'm your FoxBoard AI 🚀\n\nI can help manage your goals:\n\n• **Create**: \"Add task: Morning jog, 2 hours\"\n• **Move**: \"Move Learn Spanish to Complete\"\n• **Done**: \"Mark Meditate as done\"\n• **Summary**: \"What did I finish?\"\n• **Suggest**: \"What should I work on next?\"",
     },
   ]);
   const [input, setInput] = useState("");
@@ -203,7 +203,7 @@ export function AIChatButton() {
                 <Bot className="w-4 h-4 text-primary" />
               </div>
               <div>
-                <p className="text-sm font-display font-semibold text-foreground">LifeBoard AI</p>
+                <p className="text-sm font-display font-semibold text-foreground">FoxBoard AI</p>
                 <p className="text-[10px] text-muted-foreground">Powered by Lovable Cloud</p>
               </div>
             </div>
