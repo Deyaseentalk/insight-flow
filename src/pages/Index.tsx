@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { TaskProvider } from "@/context/TaskContext";
-import { TopBar } from "@/components/TopBar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { KanbanBoard } from "@/components/KanbanBoard";
 import { AIChatButton } from "@/components/AIChatButton";
@@ -14,7 +15,6 @@ const Index = () => {
     document.documentElement.classList.toggle("dark", darkMode);
   }, [darkMode]);
 
-  // Keyboard shortcut: N to add task
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (
@@ -33,17 +33,25 @@ const Index = () => {
 
   return (
     <TaskProvider>
-      <div className="flex flex-col min-h-screen bg-background transition-colors duration-300">
-        <TopBar darkMode={darkMode} onToggleDark={() => setDarkMode(!darkMode)} />
-        <DashboardHeader />
-        <KanbanBoard />
-        <AIChatButton />
-        <TaskDialog
-          open={quickAddOpen}
-          onOpenChange={setQuickAddOpen}
-          task={null}
-        />
-      </div>
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full">
+          <AppSidebar />
+          <div className="flex-1 flex flex-col min-w-0">
+            <header className="flex items-center gap-2 px-4 py-3 border-b border-border bg-card/50 backdrop-blur-sm">
+              <SidebarTrigger />
+              <h1 className="text-lg font-display font-bold text-foreground">FoxBoard</h1>
+            </header>
+            <DashboardHeader />
+            <KanbanBoard />
+          </div>
+          <AIChatButton />
+          <TaskDialog
+            open={quickAddOpen}
+            onOpenChange={setQuickAddOpen}
+            task={null}
+          />
+        </div>
+      </SidebarProvider>
     </TaskProvider>
   );
 };
