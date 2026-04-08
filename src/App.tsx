@@ -4,9 +4,11 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import Index from "./pages/Index.tsx";
-import Auth from "./pages/Auth.tsx";
-import NotFound from "./pages/NotFound.tsx";
+import Layout from "./pages/Layout";
+import Auth from "./pages/Auth";
+import Chat from "./pages/Chat";
+import Profile from "./pages/Profile";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -22,10 +24,13 @@ const App = () => (
             path="/"
             element={
               <ProtectedRoute>
-                <Index />
+                <Layout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route path="chat" element={<Chat />} />
+            <Route path="profile" element={<Profile />} />
+          </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
