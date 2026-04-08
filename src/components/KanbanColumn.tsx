@@ -3,7 +3,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { Plus, Inbox } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Column, Task } from "@/types/task";
 import { TaskCard } from "./TaskCard";
 import { Button } from "@/components/ui/button";
