@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Sidebar,
@@ -13,11 +13,9 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, MessageCircle, User, LogOut } from "lucide-react";
+import { LayoutDashboard, MessageCircle, User } from "lucide-react";
 import foxLogo from "@/assets/fox_logo.png";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { toast } from "sonner";
 
 interface Profile {
   display_name: string | null;
@@ -26,9 +24,9 @@ interface Profile {
 
 export function AppSidebar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [email, setEmail] = useState("");
-  const [activeItem, setActiveItem] = useState("dashboard");
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -46,22 +44,21 @@ export function AppSidebar() {
     loadProfile();
   }, []);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    toast.success("Signed out");
-    navigate("/auth");
-  };
-
   const initials = profile?.display_name
     ? profile.display_name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
     : email.slice(0, 2).toUpperCase();
+
+  const navItems = [
+    { title: "Dashboard", icon: LayoutDashboard, path: "/" },
+    { title: "AI Chat", icon: MessageCircle, path: "/chat" },
+  ];
 
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
           <img src={foxLogo} alt="FoxBoard" className="w-9 h-9 rounded-lg shrink-0" />
-          <span className="text-lg font-display font-bold text-sidebar-foreground tracking-tight group-data-[collapsible=icon]:hidden">
+          <span className="text-lg font-display font-bold text-sidebar-foreground tracking-tight">
             FoxBoard
           </span>
         </div>
@@ -72,67 +69,41 @@ export function AppSidebar() {
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={activeItem === "dashboard"}
-                  onClick={() => setActiveItem("dashboard")}
-                  tooltip="Dashboard"
-                >
-                  <LayoutDashboard className="w-4 h-4" />
-                  <span>Dashboard</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={activeItem === "chat"}
-                  onClick={() => setActiveItem("chat")}
-                  tooltip="AI Chat"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>AI Chat</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Account</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Profile">
-                  <User className="w-4 h-4" />
-                  <span>Profile</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {navItems.map((item) => (
+                <SidebarMenuItem key={item.path}>
+                  <SidebarMenuButton
+                    isActive={location.pathname === item.path}
+                    onClick={() => navigate(item.path)}
+                    tooltip={item.title}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    <span>{item.title}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter className="p-3">
-        <div className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center">
+        <button
+          onClick={() => navigate("/profile")}
+          className="flex items-center gap-3 w-full rounded-lg p-2 hover:bg-sidebar-accent transition-colors text-left"
+        >
           <Avatar className="h-8 w-8 shrink-0">
             <AvatarFallback className="bg-primary/15 text-primary text-xs font-semibold">
               {initials}
             </AvatarFallback>
           </Avatar>
-          <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
+          <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-sidebar-foreground truncate">
               {profile?.display_name || "User"}
             </p>
-            <p className="text-xs text-muted-foreground truncate">{email}</p>
+            <p className="text-[10px] text-muted-foreground truncate">Profile</p>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 shrink-0 group-data-[collapsible=icon]:hidden"
-            onClick={handleLogout}
-          >
-            <LogOut className="w-4 h-4" />
-          </Button>
-        </div>
+          <User className="w-4 h-4 text-muted-foreground shrink-0" />
+        </button>
       </SidebarFooter>
     </Sidebar>
   );
