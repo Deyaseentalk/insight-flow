@@ -57,7 +57,7 @@ export function AppSidebar() {
     : email.slice(0, 2).toUpperCase();
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar>
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
           <img src={foxLogo} alt="FoxBoard" className="w-9 h-9 rounded-lg shrink-0" />

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { TaskProvider } from "@/context/TaskContext";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { KanbanBoard } from "@/components/KanbanBoard";
@@ -37,10 +37,6 @@ const Index = () => {
         <div className="min-h-screen flex w-full">
           <AppSidebar />
           <div className="flex-1 flex flex-col min-w-0">
-            <header className="flex items-center gap-2 px-4 py-3 border-b border-border bg-card/50 backdrop-blur-sm">
-              <SidebarTrigger />
-              <h1 className="text-lg font-display font-bold text-foreground">FoxBoard</h1>
-            </header>
             <DashboardHeader />
             <KanbanBoard />
           </div>
