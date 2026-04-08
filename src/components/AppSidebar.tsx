@@ -13,7 +13,8 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, MessageCircle, User, LogOut, Zap } from "lucide-react";
+import { LayoutDashboard, MessageCircle, User, LogOut } from "lucide-react";
+import foxLogo from "@/assets/fox_logo.png";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
@@ -59,9 +60,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary/15 shrink-0">
-            <Zap className="w-5 h-5 text-primary" />
-          </div>
+          <img src={foxLogo} alt="FoxBoard" className="w-9 h-9 rounded-lg shrink-0" />
           <span className="text-lg font-display font-bold text-sidebar-foreground tracking-tight group-data-[collapsible=icon]:hidden">
             FoxBoard
           </span>

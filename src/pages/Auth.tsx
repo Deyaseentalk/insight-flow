@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Zap, Mail, Lock, User } from "lucide-react";
+import { Mail, Lock, User } from "lucide-react";
+import foxLogo from "@/assets/fox_logo.png";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -56,9 +57,7 @@ const Auth = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="flex items-center justify-center gap-3 mb-8">
-          <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-primary/15">
-            <Zap className="w-6 h-6 text-primary" />
-          </div>
+          <img src={foxLogo} alt="FoxBoard" className="w-11 h-11 rounded-xl" />
           <h1 className="text-3xl font-display font-bold text-foreground tracking-tight">
             FoxBoard
           </h1>
