@@ -177,7 +177,7 @@ const Chat = () => {
           <p className="text-xs text-muted-foreground">Your personal goal assistant</p>
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
           <span className="text-xs text-muted-foreground">Online</span>
         </div>
       </div>
