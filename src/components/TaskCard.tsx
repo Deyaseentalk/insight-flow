@@ -57,7 +57,7 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`group relative rounded-xl border p-4 cursor-pointer
+      className={`group relative rounded-xl border pl-7 pr-4 py-4 cursor-pointer
         transition-all duration-200 hover:shadow-lg
         ${COLUMN_TINT[task.columnId]}
         ${isDragging ? "opacity-50 shadow-2xl scale-105 z-50" : ""}
@@ -68,7 +68,7 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
       <div
         {...attributes}
         {...listeners}
-        className="absolute left-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-60 transition-opacity cursor-grab active:cursor-grabbing"
+        className="absolute left-1.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-60 transition-opacity cursor-grab active:cursor-grabbing"
         onClick={(e) => e.stopPropagation()}
       >
         <GripVertical className="w-4 h-4 text-muted-foreground" />
