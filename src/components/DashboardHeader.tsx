@@ -50,7 +50,7 @@ function AnimatedProgress({ value }: { value: number }) {
           <Zap className="w-4 h-4 text-violet" />
           <span className="text-sm font-medium text-foreground">Overall Progress</span>
         </div>
-        <div className="w-48 h-2.5 rounded-full bg-muted overflow-hidden">
+        <div className="w-full h-2.5 rounded-full bg-muted overflow-hidden">
           <div
             className="h-full rounded-full transition-all duration-1000 ease-out"
             style={{
