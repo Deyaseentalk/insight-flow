@@ -45,7 +45,7 @@ function AnimatedProgress({ value }: { value: number }) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-1.5 flex-1">
         <div className="flex items-center gap-2">
           <Zap className="w-4 h-4 text-violet" />
           <span className="text-sm font-medium text-foreground">Overall Progress</span>
