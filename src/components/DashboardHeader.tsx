@@ -14,7 +14,7 @@ function AnimatedProgress({ value }: { value: number }) {
   const strokeDashoffset = circumference - (animatedValue / 100) * circumference;
 
   return (
-    <div className="flex items-center gap-5">
+    <div className="flex items-center gap-5 w-full">
       <div className="relative w-24 h-24 flex-shrink-0">
         <svg className="w-24 h-24 -rotate-90" viewBox="0 0 96 96">
           <circle
