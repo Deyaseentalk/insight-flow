@@ -14,7 +14,7 @@ function AnimatedProgress({ value }: { value: number }) {
   const strokeDashoffset = circumference - (animatedValue / 100) * circumference;
 
   return (
-    <div className="flex items-center gap-5">
+    <div className="flex items-center gap-5 w-full">
       <div className="relative w-24 h-24 flex-shrink-0">
         <svg className="w-24 h-24 -rotate-90" viewBox="0 0 96 96">
           <circle
@@ -45,12 +45,12 @@ function AnimatedProgress({ value }: { value: number }) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-1.5 flex-1">
         <div className="flex items-center gap-2">
           <Zap className="w-4 h-4 text-violet" />
           <span className="text-sm font-medium text-foreground">Overall Progress</span>
         </div>
-        <div className="w-48 h-2.5 rounded-full bg-muted overflow-hidden">
+        <div className="w-full h-2.5 rounded-full bg-muted overflow-hidden">
           <div
             className="h-full rounded-full transition-all duration-1000 ease-out"
             style={{
@@ -143,8 +143,10 @@ export function DashboardHeader() {
         </div>
       </div>
 
-      <div className="mt-4 flex items-center gap-4">
-        <AnimatedProgress value={progress} />
+      <div className="mt-4 flex items-center gap-4 w-full">
+        <div className="flex-1">
+          <AnimatedProgress value={progress} />
+        </div>
         {overdueTasks > 0 && (
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-destructive/10 text-destructive text-xs font-medium ml-auto">
             <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
