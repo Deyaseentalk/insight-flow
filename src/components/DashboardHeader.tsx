@@ -143,8 +143,10 @@ export function DashboardHeader() {
         </div>
       </div>
 
-      <div className="mt-4 flex items-center gap-4">
-        <AnimatedProgress value={progress} />
+      <div className="mt-4 flex items-center gap-4 w-full">
+        <div className="flex-1">
+          <AnimatedProgress value={progress} />
+        </div>
         {overdueTasks > 0 && (
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-destructive/10 text-destructive text-xs font-medium ml-auto">
             <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
