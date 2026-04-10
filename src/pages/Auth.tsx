@@ -17,6 +17,11 @@ const Auth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    document.documentElement.classList.add("dark");
+    return () => {};
+  }, []);
+
+  useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) navigate("/", { replace: true });
     });
@@ -54,8 +59,18 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="dark min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Ambient glow effects */}
+      <div
+        className="absolute top-1/4 -left-32 w-96 h-96 rounded-full opacity-20 blur-3xl pointer-events-none"
+        style={{ background: "hsl(var(--violet))" }}
+      />
+      <div
+        className="absolute bottom-1/4 -right-32 w-96 h-96 rounded-full opacity-10 blur-3xl pointer-events-none"
+        style={{ background: "hsl(var(--peacock))" }}
+      />
+
+      <div className="w-full max-w-md relative z-10 animate-fade-in">
         <div className="flex items-center justify-center gap-3 mb-8">
           <img src={foxLogo} alt="FoxBoard" className="w-11 h-11 rounded-xl" />
           <h1 className="text-3xl font-display font-bold text-foreground tracking-tight">
@@ -63,7 +78,7 @@ const Auth = () => {
           </h1>
         </div>
 
-        <div className="bg-card border border-border rounded-2xl p-8 shadow-xl">
+        <div className="bg-card border border-border rounded-2xl p-8 shadow-xl backdrop-blur-sm">
           <h2 className="text-xl font-display font-semibold text-foreground mb-1 text-center">
             {isLogin ? "Welcome back" : "Create account"}
           </h2>

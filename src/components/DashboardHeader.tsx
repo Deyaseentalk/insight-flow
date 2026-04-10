@@ -1,6 +1,76 @@
-import { Clock, CheckCircle2, Timer, TrendingUp } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { Clock, CheckCircle2, Timer, TrendingUp, Zap } from "lucide-react";
 import { useTaskContext } from "@/context/TaskContext";
+import { useState, useEffect } from "react";
+
+function AnimatedProgress({ value }: { value: number }) {
+  const [animatedValue, setAnimatedValue] = useState(0);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setAnimatedValue(value), 100);
+    return () => clearTimeout(timeout);
+  }, [value]);
+
+  const circumference = 2 * Math.PI * 40;
+  const strokeDashoffset = circumference - (animatedValue / 100) * circumference;
+
+  return (
+    <div className="flex items-center gap-5">
+      <div className="relative w-24 h-24 flex-shrink-0">
+        <svg className="w-24 h-24 -rotate-90" viewBox="0 0 96 96">
+          <circle
+            cx="48" cy="48" r="40"
+            stroke="hsl(var(--muted))"
+            strokeWidth="6"
+            fill="none"
+          />
+          <circle
+            cx="48" cy="48" r="40"
+            stroke="hsl(var(--violet))"
+            strokeWidth="6"
+            fill="none"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={strokeDashoffset}
+            className="transition-all duration-1000 ease-out"
+            style={{
+              filter: "drop-shadow(0 0 6px hsl(var(--violet) / 0.4))",
+            }}
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-xl font-display font-bold text-foreground">
+            {Math.round(animatedValue)}%
+          </span>
+          <span className="text-[10px] text-muted-foreground">done</span>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <div className="flex items-center gap-2">
+          <Zap className="w-4 h-4 text-violet" />
+          <span className="text-sm font-medium text-foreground">Overall Progress</span>
+        </div>
+        <div className="w-48 h-2.5 rounded-full bg-muted overflow-hidden">
+          <div
+            className="h-full rounded-full transition-all duration-1000 ease-out"
+            style={{
+              width: `${animatedValue}%`,
+              background: `linear-gradient(90deg, hsl(var(--violet)), hsl(var(--peacock)))`,
+              boxShadow: `0 0 10px hsl(var(--violet) / 0.3)`,
+            }}
+          />
+        </div>
+        <span className="text-xs text-muted-foreground">
+          {animatedValue >= 100
+            ? "All tasks complete! 🎉"
+            : animatedValue >= 50
+            ? "Great progress, keep going!"
+            : "Let's get things done!"}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export function DashboardHeader() {
   const { tasks } = useTaskContext();
@@ -74,19 +144,9 @@ export function DashboardHeader() {
       </div>
 
       <div className="mt-4 flex items-center gap-4">
-        <div className="flex-1">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-medium text-muted-foreground">
-              Overall Progress
-            </span>
-            <span className="text-xs font-bold text-foreground">
-              {Math.round(progress)}%
-            </span>
-          </div>
-          <Progress value={progress} className="h-2 bg-muted" />
-        </div>
+        <AnimatedProgress value={progress} />
         {overdueTasks > 0 && (
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-destructive/10 text-destructive text-xs font-medium">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-destructive/10 text-destructive text-xs font-medium ml-auto">
             <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
             {overdueTasks} overdue
           </div>
