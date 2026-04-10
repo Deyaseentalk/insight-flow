@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/sidebar";
 import { LayoutDashboard, MessageCircle, User } from "lucide-react";
 import foxLogo from "@/assets/fox_logo.png";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface Profile {
   display_name: string | null;
@@ -42,6 +42,20 @@ export function AppSidebar() {
       }
     };
     loadProfile();
+
+    // Re-fetch profile when navigating back (e.g. after avatar change)
+    const channel = supabase
+      .channel("profile-changes")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "profiles" },
+        (payload) => {
+          setProfile(payload.new as Profile);
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   const initials = profile?.display_name
@@ -92,6 +106,7 @@ export function AppSidebar() {
           className="flex items-center gap-3 w-full rounded-lg p-2 hover:bg-sidebar-accent transition-colors text-left"
         >
           <Avatar className="h-8 w-8 shrink-0">
+            <AvatarImage src={profile?.avatar_url || undefined} alt="Avatar" />
             <AvatarFallback className="bg-primary/15 text-primary text-xs font-semibold">
               {initials}
             </AvatarFallback>
